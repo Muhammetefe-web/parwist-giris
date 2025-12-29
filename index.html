@@ -3,77 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parwist - Giriş Paneli</title>
+    <title>Parwist - Giriş</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background-color: #111; padding: 40px; border-radius: 15px; width: 320px; text-align: center; border: 1px solid #333; }
-        .logo { width: 140px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; outline: none; }
-        button { width: 100%; padding: 12px; background: #fff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .toggle-btn { color: #888; background: none; border: none; margin-top: 15px; text-decoration: underline; cursor: pointer; font-size: 13px; }
-        #message { margin-top: 15px; font-size: 14px; min-height: 20px; }
+        /* Tam ekran video arka planı */
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover; /* Videonun ekranı tam kaplamasını sağlar */
+            filter: brightness(0.4); /* Videoyu biraz karartır ki yazılar okunsun */
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px); /* Cam efekti */
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 340px;
+            text-align: center;
+        }
+
+        .logo { width: 120px; margin-bottom: 10px; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            text-decoration: underline;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        #message { margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img src="logo.png" alt="Parwist Logo" class="logo">
+    <video autoplay muted loop playsinline id="video-background">
+        <source src="arka-plan.mp4" type="video/mp4">
+    </video>
 
-    <form id="parwistForm" action="https://script.google.com/macros/s/AKfycbw-XTGoFtOQfGYiHZQcloeFJjCfpn4mc0z_WgcyxJgNrKn0rhoEhjoF2EU2Eyy6xZOx/exec" method="POST" target="hidden_iframe">
-        <h2 id="title">Giriş Yap</h2>
-        <input type="hidden" name="action" id="form-action" value="login">
-        <input type="email" name="email" id="email" placeholder="E-posta" required>
-        <input type="password" name="sifre" id="pass" placeholder="Şifre" required>
-        <button type="submit" id="submit-btn">Gönder</button>
-        <button type="button" class="toggle-btn" id="toggle-link" onclick="toggleForm()">Hesabın yok mu? Kayıt Ol</button>
-    </form>
+    <div class="container">
+        <img src="logo.png" alt="Parwist Logo" class="logo">
+        
+        <form id="parwistForm" action="https://script.google.com/macros/s/AKfycbw-XTGoFtOQfGYiHZQcloeFJjCfpn4mc0z_WgcyxJgNrKn0rhoEhjoF2EU2Eyy6xZOx/exec" method="POST" target="hidden_iframe">
+            <h2 id="title">Giriş Yap</h2>
+            <input type="hidden" name="action" id="form-action" value="login">
+            <input type="email" name="email" id="email" placeholder="E-posta" required>
+            <input type="password" name="sifre" id="pass" placeholder="Şifre" required>
+            <button type="submit" id="submit-btn">Devam Et</button>
+            <button type="button" class="toggle-btn" id="toggle-link" onclick="toggleForm()">Hesabın yok mu? Kayıt Ol</button>
+        </form>
 
-    <div id="message"></div>
+        <div id="message"></div>
+        <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+    </div>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-</div>
+    <script>
+        var isSubmitted = false;
+        var currentMode = 'login';
+        var myForm = document.getElementById('parwistForm');
+        var myIframe = document.getElementById('hidden_iframe');
+        var msgBox = document.getElementById('message');
 
-<script>
-    // 1. Değişkenleri ve elementleri tanımla
-    var isSubmitted = false;
-    var currentMode = 'login';
-    var myForm = document.getElementById('parwistForm');
-    var myIframe = document.getElementById('hidden_iframe');
-    var msgBox = document.getElementById('message');
-
-    // 2. Mod değiştirme fonksiyonu
-    function toggleForm() {
-        currentMode = (currentMode === 'login') ? 'register' : 'login';
-        document.getElementById('form-action').value = currentMode;
-        document.getElementById('title').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
-        document.getElementById('submit-btn').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
-        document.getElementById('toggle-link').innerText = (currentMode === 'login') ? 'Hesabın yok mu? Kayıt Ol' : 'Zaten üye misin? Giriş Yap';
-        msgBox.innerText = "";
-    }
-
-    // 3. Form gönderimini dinle
-    myForm.addEventListener('submit', function() {
-        isSubmitted = true;
-        msgBox.style.color = "yellow";
-        msgBox.innerText = "Parwist sunucusuna bağlanılıyor...";
-    });
-
-    // 4. Iframe yüklenmesini JavaScript içinden dinle (En güvenli yol budur)
-    myIframe.addEventListener('load', function() {
-        if (isSubmitted) {
-            msgBox.style.color = "lightgreen";
-            msgBox.innerText = "İşlem iletildi! Lütfen tabloyu kontrol edin.";
-            
-            if (currentMode === 'register') {
-                setTimeout(function() {
-                    toggleForm();
-                    msgBox.innerText = "Kayıt başarılı. Şimdi giriş yapabilirsiniz.";
-                }, 2000);
-            }
-            isSubmitted = false;
+        function toggleForm() {
+            currentMode = (currentMode === 'login') ? 'register' : 'login';
+            document.getElementById('form-action').value = currentMode;
+            document.getElementById('title').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+            document.getElementById('submit-btn').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+            document.getElementById('toggle-link').innerText = (currentMode === 'login') ? 'Hesabın yok mu? Kayıt Ol' : 'Zaten üye misin? Giriş Yap';
+            msgBox.innerText = "";
         }
-    });
-</script>
 
+        myForm.addEventListener('submit', function() {
+            isSubmitted = true;
+            msgBox.style.color = "yellow";
+            msgBox.innerText = "İşlem iletiliyor...";
+        });
+
+        myIframe.addEventListener('load', function() {
+            if (isSubmitted) {
+                msgBox.style.color = "#00ff00";
+                msgBox.innerText = "Başarılı! Tabloyu kontrol edin.";
+                if (currentMode === 'register') {
+                    setTimeout(toggleForm, 2000);
+                }
+                isSubmitted = false;
+            }
+        });
+    </script>
 </body>
 </html>
