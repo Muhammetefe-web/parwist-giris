@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1B9U_snOeFTMWxBFT7sdbl5YFN3Q_bBz0HxXyRliLArVzRQCbI1YPcSQ3rbYP80Q/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR1ISvRUBCNvq3oLKhCJhBvJpG8XYYAXWJili7C4bFUlbWzdgehsw09ABsXJX1BzfD/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
     let mode = 'login';
 
     function toggleMode() {
@@ -43,45 +43,49 @@
         document.getElementById('message').innerText = "";
     }
 
-    async function handleAuth() {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('pass').value;
-        const msgBox = document.getElementById('message');
+  async function handleAuth() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    const msgBox = document.getElementById('message');
 
-        if(!email || !pass) { alert("Lütfen doldurun!"); return; }
+    if(!email || !pass) { alert("Lütfen alanları doldurun!"); return; }
 
-        msgBox.innerText = "İşleniyor...";
-        msgBox.style.color = "yellow";
+    msgBox.innerText = "İşleniyor...";
+    msgBox.style.color = "yellow";
 
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: mode,
-                    email: email,
-                    sifre: pass
-                })
-            });
-            
-            const result = await response.text();
-            msgBox.innerText = result;
+    try {
+        // fetch isteğini daha esnek hale getirdik
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: mode,
+                email: email,
+                sifre: pass
+            })
+        });
+        
+        const result = await response.text();
+        console.log("Sunucudan gelen yanıt:", result); // Tarayıcı konsolunda hatayı görmek için
 
-            if (result === "Giriş Başarılı") {
-                msgBox.style.color = "lightgreen";
-                // Girişten sonra nereye gidileceğini buraya yazın:
-                // window.location.href = "anasayfa.html";
-            } else if (result === "Kayıt Başarılı") {
-                msgBox.style.color = "lightgreen";
-                setTimeout(toggleMode, 1500); // Kayıttan sonra giriş ekranına dön
-            } else {
-                msgBox.style.color = "red";
-            }
-        } catch (error) {
-            msgBox.innerText = "Hata oluştu!";
-            console.error(error);
+        if (result.includes("Giriş Başarılı")) {
+            msgBox.style.color = "lightgreen";
+            msgBox.innerText = "Giriş Başarılı!";
+        } else if (result.includes("Kayıt Başarılı")) {
+            msgBox.style.color = "lightgreen";
+            msgBox.innerText = "Kayıt Başarılı! Şimdi giriş yapabilirsiniz.";
+            setTimeout(toggleMode, 2000);
+        } else {
+            msgBox.style.color = "red";
+            msgBox.innerText = result; // Google'dan gelen hata mesajını gösterir
         }
+    } catch (error) {
+        msgBox.style.color = "red";
+        msgBox.innerText = "Bağlantı hatası! Lütfen URL'nizi ve internetinizi kontrol edin.";
     }
+}
 </script>
 
 </body>
 </html>
+
