@@ -11,64 +11,66 @@
         input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #fff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .toggle-btn { color: #888; background: none; border: none; margin-top: 15px; text-decoration: underline; cursor: pointer; font-size: 13px; }
-        .hidden { display: none; }
-        #message { margin-top: 15px; font-size: 14px; }
+        #message { margin-top: 15px; font-size: 14px; min-height: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <img src="logo.png" alt="Parwist Logo" class="logo">
-    
+
     <form id="parwistForm" action="https://script.google.com/macros/s/AKfycbw-XTGoFtOQfGYiHZQcloeFJjCfpn4mc0z_WgcyxJgNrKn0rhoEhjoF2EU2Eyy6xZOx/exec" method="POST" target="hidden_iframe">
         <h2 id="title">Giriş Yap</h2>
         <input type="hidden" name="action" id="form-action" value="login">
         <input type="email" name="email" id="email" placeholder="E-posta" required>
         <input type="password" name="sifre" id="pass" placeholder="Şifre" required>
-        <button type="submit" onclick="showMsg()">Gönder</button>
-        <button type="button" class="toggle-btn" onclick="toggleForm()">Hesabın yok mu? Kayıt Ol</button>
+        <button type="submit" id="submit-btn">Gönder</button>
+        <button type="button" class="toggle-btn" id="toggle-link" onclick="toggleForm()">Hesabın yok mu? Kayıt Ol</button>
     </form>
 
-    <div id="message" style="margin-top:15px;"></div>
+    <div id="message"></div>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) { checkResult(); }"></iframe>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="handleIframeLoad()"></iframe>
 </div>
 
 <script>
-    let submitted = false;
-    let currentMode = 'login';
+    // Değişkenleri en üstte tanımlıyoruz ki ReferenceError almayalım
+    var isSubmitted = false;
+    var currentMode = 'login';
 
     function toggleForm() {
         currentMode = (currentMode === 'login') ? 'register' : 'login';
         document.getElementById('form-action').value = currentMode;
         document.getElementById('title').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
-        // Buton ve link yazılarını da buradan güncelleyebilirsiniz
+        document.getElementById('submit-btn').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+        document.getElementById('toggle-link').innerText = (currentMode === 'login') ? 'Hesabın yok mu? Kayıt Ol' : 'Zaten üye misin? Giriş Yap';
+        document.getElementById('message').innerText = "";
     }
 
-    function showMsg() {
-        if(document.getElementById('email').value && document.getElementById('pass').value) {
-            submitted = true;
-            document.getElementById('message').innerText = "İşlem iletiliyor...";
-        }
-    }
+    // Form gönderildiğinde bu fonksiyon çalışır
+    document.getElementById('parwistForm').onsubmit = function() {
+        isSubmitted = true;
+        document.getElementById('message').style.color = "yellow";
+        document.getElementById('message').innerText = "Parwist sunucusuna bağlanılıyor...";
+    };
 
-    function checkResult() {
-        // Iframe yüklendiğinde burası çalışır
-        document.getElementById('message').innerText = "İşlem başarıyla tamamlandı! Lütfen tabloyu kontrol edin.";
-        document.getElementById('message').style.color = "lightgreen";
-        
-        if(currentMode === 'register') {
-            setTimeout(() => { location.reload(); }, 2000);
+    // Iframe yüklendiğinde (yani Google'dan cevap geldiğinde) bu çalışır
+    function handleIframeLoad() {
+        if (isSubmitted) {
+            document.getElementById('message').style.color = "lightgreen";
+            document.getElementById('message').innerText = "İşlem iletildi! Lütfen tabloyu kontrol edin.";
+            
+            // Kayıt modundaysak 2 saniye sonra giriş moduna geri dön
+            if (currentMode === 'register') {
+                setTimeout(function() {
+                    toggleForm();
+                    document.getElementById('message').innerText = "Kayıt başarılı. Şimdi giriş yapabilirsiniz.";
+                }, 2000);
+            }
+            isSubmitted = false; // İşlem bitti, resetle
         }
     }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
