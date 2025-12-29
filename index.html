@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR1ISvRUBCNvq3oLKhCJhBvJpG8XYYAXWJili7C4bFUlbWzdgehsw09ABsXJX1BzfD/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9ZezFxBGHMjRHf0CVPbQo1X-mtDvNLss6pPqscT7JgVxeV4e1PzcjUF0iTZp40HsD/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
     let mode = 'login';
 
     function toggleMode() {
@@ -43,21 +43,20 @@
         document.getElementById('message').innerText = "";
     }
 
-  async function handleAuth() {
+async function handleAuth() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
     const msgBox = document.getElementById('message');
 
     if(!email || !pass) { alert("Lütfen alanları doldurun!"); return; }
 
-    msgBox.innerText = "İşleniyor...";
-    msgBox.style.color = "yellow";
+    msgBox.innerText = "Parwist Sistemine Bağlanılıyor...";
+    msgBox.style.color = "white";
 
     try {
-        // fetch isteğini daha esnek hale getirdik
+        // Yeni Dağıtım URL'nizi buraya koyun
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            header: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: mode,
                 email: email,
@@ -66,27 +65,28 @@
         });
         
         const result = await response.text();
-        console.log("Sunucudan gelen yanıt:", result); // Tarayıcı konsolunda hatayı görmek için
 
-        if (result.includes("Giriş Başarılı")) {
+        if (result === "Giriş Başarılı") {
             msgBox.style.color = "lightgreen";
-            msgBox.innerText = "Giriş Başarılı!";
-        } else if (result.includes("Kayıt Başarılı")) {
+            msgBox.innerText = "Giriş Başarılı! Hoş geldiniz.";
+        } else if (result === "Kayıt Başarılı") {
             msgBox.style.color = "lightgreen";
             msgBox.innerText = "Kayıt Başarılı! Şimdi giriş yapabilirsiniz.";
             setTimeout(toggleMode, 2000);
         } else {
-            msgBox.style.color = "red";
-            msgBox.innerText = result; // Google'dan gelen hata mesajını gösterir
+            msgBox.style.color = "orange";
+            msgBox.innerText = result; // "Hatalı Giriş" gibi mesajları gösterir
         }
     } catch (error) {
+        console.error("Hata Detayı:", error);
         msgBox.style.color = "red";
-        msgBox.innerText = "Bağlantı hatası! Lütfen URL'nizi ve internetinizi kontrol edin.";
+        msgBox.innerText = "Sunucuya ulaşılamadı. Lütfen URL'yi güncelleyin veya 1 dakika sonra deneyin.";
     }
 }
 </script>
 
 </body>
 </html>
+
 
 
