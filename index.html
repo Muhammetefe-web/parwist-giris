@@ -2,47 +2,84 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Parwist Giriş Sistemi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parwist - Giriş Sistemi</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #111; padding: 30px; border-radius: 10px; width: 300px; text-align: center; border: 1px solid #333; }
-        .logo { width: 120px; margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background: #fff; color: #000; border: none; cursor: pointer; font-weight: bold; }
+        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background-color: #111; padding: 40px; border-radius: 15px; width: 320px; text-align: center; border: 1px solid #333; }
+        .logo { width: 140px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #fff; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .toggle-btn { color: #888; background: none; border: none; margin-top: 15px; text-decoration: underline; cursor: pointer; font-size: 13px; }
         .hidden { display: none; }
+        #message { margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="logo.png" alt="Parwist" class="logo">
-    
-    <div id="reg-box">
-        <h2>Kayıt Ol</h2>
+    <img src="logo.png" alt="Parwist Logo" class="logo">
+
+    <div id="auth-box">
+        <h2 id="title">Giriş Yap</h2>
         <input type="email" id="email" placeholder="E-posta">
         <input type="password" id="pass" placeholder="Şifre">
-        <button onclick="kaydet()">Kaydı GitHub Üzerinden Tamamla</button>
+        <button id="main-btn" onclick="handleAuth()">Giriş Yap</button>
+        <button class="toggle-btn" id="toggle-link" onclick="toggleMode()">Hesabın yok mu? Kayıt Ol</button>
     </div>
-    <p id="msg"></p>
+
+    <div id="message"></div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeS4R37C4WSvJoNpQZS9qAV6lHXFjb7TQbN1ujsijlAcqZW5jKcZBdV0orENHDntls/exec"; // Google'dan aldığınız linki buraya yapıştırın
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1B9U_snOeFTMWxBFT7sdbl5YFN3Q_bBz0HxXyRliLArVzRQCbI1YPcSQ3rbYP80Q/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
+    let mode = 'login';
 
-    function kaydet() {
+    function toggleMode() {
+        mode = (mode === 'login') ? 'register' : 'login';
+        document.getElementById('title').innerText = (mode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+        document.getElementById('main-btn').innerText = (mode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+        document.getElementById('toggle-link').innerText = (mode === 'login') ? 'Hesabın yok mu? Kayıt Ol' : 'Zaten üye misin? Giriş Yap';
+        document.getElementById('message').innerText = "";
+    }
+
+    async function handleAuth() {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
-        document.getElementById('msg').innerText = "Kaydediliyor...";
+        const msgBox = document.getElementById('message');
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ email: email, sifre: pass })
-        }).then(() => {
-            document.getElementById('msg').innerText = "Kayıt Başarılı! Verileriniz Google Sheets'e iletildi.";
-            // Burada kullanıcıyı yerel olarak da hatırlayabiliriz
-            localStorage.setItem('parwist_user', email);
-        });
+        if(!email || !pass) { alert("Lütfen doldurun!"); return; }
+
+        msgBox.innerText = "İşleniyor...";
+        msgBox.style.color = "yellow";
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: mode,
+                    email: email,
+                    sifre: pass
+                })
+            });
+            
+            const result = await response.text();
+            msgBox.innerText = result;
+
+            if (result === "Giriş Başarılı") {
+                msgBox.style.color = "lightgreen";
+                // Girişten sonra nereye gidileceğini buraya yazın:
+                // window.location.href = "anasayfa.html";
+            } else if (result === "Kayıt Başarılı") {
+                msgBox.style.color = "lightgreen";
+                setTimeout(toggleMode, 1500); // Kayıttan sonra giriş ekranına dön
+            } else {
+                msgBox.style.color = "red";
+            }
+        } catch (error) {
+            msgBox.innerText = "Hata oluştu!";
+            console.error(error);
+        }
     }
 </script>
 
