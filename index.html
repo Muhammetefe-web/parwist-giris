@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Parwist Giriş Sistemi</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #111; padding: 30px; border-radius: 10px; width: 300px; text-align: center; border: 1px solid #333; }
+        .logo { width: 120px; margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #fff; color: #000; border: none; cursor: pointer; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="logo.png" alt="Parwist" class="logo">
+    
+    <div id="reg-box">
+        <h2>Kayıt Ol</h2>
+        <input type="email" id="email" placeholder="E-posta">
+        <input type="password" id="pass" placeholder="Şifre">
+        <button onclick="kaydet()">Kaydı GitHub Üzerinden Tamamla</button>
+    </div>
+    <p id="msg"></p>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeS4R37C4WSvJoNpQZS9qAV6lHXFjb7TQbN1ujsijlAcqZW5jKcZBdV0orENHDntls/exec"; // Google'dan aldığınız linki buraya yapıştırın
+
+    function kaydet() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        document.getElementById('msg').innerText = "Kaydediliyor...";
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ email: email, sifre: pass })
+        }).then(() => {
+            document.getElementById('msg').innerText = "Kayıt Başarılı! Verileriniz Google Sheets'e iletildi.";
+            // Burada kullanıcıyı yerel olarak da hatırlayabiliriz
+            localStorage.setItem('parwist_user', email);
+        });
+    }
+</script>
+
+</body>
+</html>
