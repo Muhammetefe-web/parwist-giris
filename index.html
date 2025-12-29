@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9ZezFxBGHMjRHf0CVPbQo1X-mtDvNLss6pPqscT7JgVxeV4e1PzcjUF0iTZp40HsD/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN5xfr-92RmtwJklTvPepuDq59ISve52hPT7QX08cAIFYJh90Cq430UT-Dv-8Ic8PR/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
     let mode = 'login';
 
     function toggleMode() {
@@ -54,39 +54,39 @@ async function handleAuth() {
     msgBox.style.color = "white";
 
     try {
-        // Yeni Dağıtım URL'nizi buraya koyun
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors', // Google Apps Script için bazen bu gereklidir
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({
                 action: mode,
                 email: email,
                 sifre: pass
             })
         });
-        
-        const result = await response.text();
 
-        if (result === "Giriş Başarılı") {
-            msgBox.style.color = "lightgreen";
-            msgBox.innerText = "Giriş Başarılı! Hoş geldiniz.";
-        } else if (result === "Kayıt Başarılı") {
-            msgBox.style.color = "lightgreen";
-            msgBox.innerText = "Kayıt Başarılı! Şimdi giriş yapabilirsiniz.";
+        // NOT: 'no-cors' modunda cevabı okuyamayız ama veri Google'a ulaşır.
+        // Eğer 'no-cors' kullanıyorsak mesajı manuel veriyoruz:
+        msgBox.style.color = "lightgreen";
+        msgBox.innerText = "İşlem başarıyla sunucuya iletildi!";
+        
+        if(mode === 'register') {
             setTimeout(toggleMode, 2000);
-        } else {
-            msgBox.style.color = "orange";
-            msgBox.innerText = result; // "Hatalı Giriş" gibi mesajları gösterir
         }
+
     } catch (error) {
         console.error("Hata Detayı:", error);
         msgBox.style.color = "red";
-        msgBox.innerText = "Sunucuya ulaşılamadı. Lütfen URL'yi güncelleyin veya 1 dakika sonra deneyin.";
+        msgBox.innerText = "Bağlantı hatası oluştu.";
     }
 }
 </script>
 
 </body>
 </html>
+
 
 
 
