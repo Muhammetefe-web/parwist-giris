@@ -19,74 +19,53 @@
 
 <div class="container">
     <img src="logo.png" alt="Parwist Logo" class="logo">
-
-    <div id="auth-box">
+    
+    <form id="parwistForm" action="https://script.google.com/macros/s/AKfycbw-XTGoFtOQfGYiHZQcloeFJjCfpn4mc0z_WgcyxJgNrKn0rhoEhjoF2EU2Eyy6xZOx/exec" method="POST" target="hidden_iframe">
         <h2 id="title">Giriş Yap</h2>
-        <input type="email" id="email" placeholder="E-posta">
-        <input type="password" id="pass" placeholder="Şifre">
-        <button id="main-btn" onclick="handleAuth()">Giriş Yap</button>
-        <button class="toggle-btn" id="toggle-link" onclick="toggleMode()">Hesabın yok mu? Kayıt Ol</button>
-    </div>
+        <input type="hidden" name="action" id="form-action" value="login">
+        <input type="email" name="email" id="email" placeholder="E-posta" required>
+        <input type="password" name="sifre" id="pass" placeholder="Şifre" required>
+        <button type="submit" onclick="showMsg()">Gönder</button>
+        <button type="button" class="toggle-btn" onclick="toggleForm()">Hesabın yok mu? Kayıt Ol</button>
+    </form>
 
-    <div id="message"></div>
+    <div id="message" style="margin-top:15px;"></div>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) { checkResult(); }"></iframe>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxa1f0kkXW4CIWYsXlxQNOCpr2IU-XTl6wINjKQ83ThgiqqKVkAxgNJeFCdSlZH9Dx6/exec"; // Buraya Google'dan aldığınız linki yapıştırın!
-    let mode = 'login';
+    let submitted = false;
+    let currentMode = 'login';
 
-    function toggleMode() {
-        mode = (mode === 'login') ? 'register' : 'login';
-        document.getElementById('title').innerText = (mode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
-        document.getElementById('main-btn').innerText = (mode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
-        document.getElementById('toggle-link').innerText = (mode === 'login') ? 'Hesabın yok mu? Kayıt Ol' : 'Zaten üye misin? Giriş Yap';
-        document.getElementById('message').innerText = "";
+    function toggleForm() {
+        currentMode = (currentMode === 'login') ? 'register' : 'login';
+        document.getElementById('form-action').value = currentMode;
+        document.getElementById('title').innerText = (currentMode === 'login') ? 'Giriş Yap' : 'Kayıt Ol';
+        // Buton ve link yazılarını da buradan güncelleyebilirsiniz
     }
 
-async function handleAuth() {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('pass').value;
-    const msgBox = document.getElementById('message');
-
-    if(!email || !pass) { alert("Lütfen alanları doldurun!"); return; }
-
-    msgBox.innerText = "İşlem gerçekleştiriliyor...";
-
-    // Veriyi klasik form verisi formatına çeviriyoruz
-    const params = new URLSearchParams();
-    params.append('action', mode);
-    params.append('email', email);
-    params.append('sifre', pass);
-
-    try {
-        // CORB hatasını aşmak için fetch yerine klasik yöntem
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Bu mod cevabı okumamızı engeller ama veriyi kesin gönderir
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
-        }).then(() => {
-            // no-cors modunda olduğumuz için yanıtı okuyamayız.
-            // Bu yüzden doğrudan tabloyu kontrol etmesini söylüyoruz.
-            msgBox.style.color = "lightgreen";
-            msgBox.innerText = "İşlem iletildi! Lütfen tabloyu kontrol edin.";
-            
-            if(mode === 'register') {
-                setTimeout(toggleMode, 2000);
-            }
-        });
-
-    } catch (error) {
-        msgBox.style.color = "red";
-        msgBox.innerText = "Bağlantı hatası!";
+    function showMsg() {
+        if(document.getElementById('email').value && document.getElementById('pass').value) {
+            submitted = true;
+            document.getElementById('message').innerText = "İşlem iletiliyor...";
+        }
     }
-}
+
+    function checkResult() {
+        // Iframe yüklendiğinde burası çalışır
+        document.getElementById('message').innerText = "İşlem başarıyla tamamlandı! Lütfen tabloyu kontrol edin.";
+        document.getElementById('message').style.color = "lightgreen";
+        
+        if(currentMode === 'register') {
+            setTimeout(() => { location.reload(); }, 2000);
+        }
+    }
 </script>
 
 </body>
 </html>
+
 
 
 
